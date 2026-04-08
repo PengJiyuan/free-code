@@ -1,49 +1,49 @@
-import { posix } from 'path'
-import type { ToolPermissionContext } from '../../Tool.js'
+import { posix } from "path";
+import type { ToolPermissionContext } from "../../Tool.js";
 // Types extracted to src/types/permissions.ts to break import cycles
 import type {
   AdditionalWorkingDirectory,
   WorkingDirectorySource,
-} from '../../types/permissions.js'
-import { logForDebugging } from '../debug.js'
-import type { EditableSettingSource } from '../settings/constants.js'
+} from "../../types/permissions.js";
+import { logForDebugging } from "../debug.js";
+import type { EditableSettingSource } from "../settings/constants.js";
 import {
   getSettingsForSource,
   updateSettingsForSource,
-} from '../settings/settings.js'
-import { jsonStringify } from '../slowOperations.js'
-import { toPosixPath } from './filesystem.js'
-import type { PermissionRuleValue } from './PermissionRule.js'
+} from "../settings/settings.js";
+import { jsonStringify } from "../slowOperations.js";
+import { toPosixPath } from "./filesystem.js";
+import type { PermissionRuleValue } from "./PermissionRule.js";
 import type {
   PermissionUpdate,
   PermissionUpdateDestination,
-} from './PermissionUpdateSchema.js'
+} from "./PermissionUpdateSchema.js";
 import {
   permissionRuleValueFromString,
   permissionRuleValueToString,
-} from './permissionRuleParser.js'
-import { addPermissionRulesToSettings } from './permissionsLoader.js'
+} from "./permissionRuleParser.js";
+import { addPermissionRulesToSettings } from "./permissionsLoader.js";
 
 // Re-export for backwards compatibility
-export type { AdditionalWorkingDirectory, WorkingDirectorySource }
+export type { AdditionalWorkingDirectory, WorkingDirectorySource };
 
 export function extractRules(
   updates: PermissionUpdate[] | undefined,
 ): PermissionRuleValue[] {
-  if (!updates) return []
+  if (!updates) return [];
 
-  return updates.flatMap(update => {
+  return updates.flatMap((update) => {
     switch (update.type) {
-      case 'addRules':
-        return update.rules
+      case "addRules":
+        return update.rules;
       default:
-        return []
+        return [];
     }
-  })
+  });
 }
 
 export function hasRules(updates: PermissionUpdate[] | undefined): boolean {
-  return extractRules(updates).length > 0
+  return extractRules(updates).length > 0;
 }
 
 /**
@@ -57,30 +57,30 @@ export function applyPermissionUpdate(
   update: PermissionUpdate,
 ): ToolPermissionContext {
   switch (update.type) {
-    case 'setMode':
+    case "setMode":
       logForDebugging(
         `Applying permission update: Setting mode to '${update.mode}'`,
-      )
+      );
       return {
         ...context,
         mode: update.mode,
-      }
+      };
 
-    case 'addRules': {
-      const ruleStrings = update.rules.map(rule =>
+    case "addRules": {
+      const ruleStrings = update.rules.map((rule) =>
         permissionRuleValueToString(rule),
-      )
+      );
       logForDebugging(
         `Applying permission update: Adding ${update.rules.length} ${update.behavior} rule(s) to destination '${update.destination}': ${jsonStringify(ruleStrings)}`,
-      )
+      );
 
       // Determine which collection to update based on behavior
       const ruleKind =
-        update.behavior === 'allow'
-          ? 'alwaysAllowRules'
-          : update.behavior === 'deny'
-            ? 'alwaysDenyRules'
-            : 'alwaysAskRules'
+        update.behavior === "allow"
+          ? "alwaysAllowRules"
+          : update.behavior === "deny"
+            ? "alwaysDenyRules"
+            : "alwaysAskRules";
 
       return {
         ...context,
@@ -91,24 +91,24 @@ export function applyPermissionUpdate(
             ...ruleStrings,
           ],
         },
-      }
+      };
     }
 
-    case 'replaceRules': {
-      const ruleStrings = update.rules.map(rule =>
+    case "replaceRules": {
+      const ruleStrings = update.rules.map((rule) =>
         permissionRuleValueToString(rule),
-      )
+      );
       logForDebugging(
         `Replacing all ${update.behavior} rules for destination '${update.destination}' with ${update.rules.length} rule(s): ${jsonStringify(ruleStrings)}`,
-      )
+      );
 
       // Determine which collection to update based on behavior
       const ruleKind =
-        update.behavior === 'allow'
-          ? 'alwaysAllowRules'
-          : update.behavior === 'deny'
-            ? 'alwaysDenyRules'
-            : 'alwaysAskRules'
+        update.behavior === "allow"
+          ? "alwaysAllowRules"
+          : update.behavior === "deny"
+            ? "alwaysDenyRules"
+            : "alwaysAskRules";
 
       return {
         ...context,
@@ -116,48 +116,48 @@ export function applyPermissionUpdate(
           ...context[ruleKind],
           [update.destination]: ruleStrings, // Replace all rules for this source
         },
-      }
+      };
     }
 
-    case 'addDirectories': {
+    case "addDirectories": {
       logForDebugging(
-        `Applying permission update: Adding ${update.directories.length} director${update.directories.length === 1 ? 'y' : 'ies'} with destination '${update.destination}': ${jsonStringify(update.directories)}`,
-      )
-      const newAdditionalDirs = new Map(context.additionalWorkingDirectories)
+        `Applying permission update: Adding ${update.directories.length} director${update.directories.length === 1 ? "y" : "ies"} with destination '${update.destination}': ${jsonStringify(update.directories)}`,
+      );
+      const newAdditionalDirs = new Map(context.additionalWorkingDirectories);
       for (const directory of update.directories) {
         newAdditionalDirs.set(directory, {
           path: directory,
           source: update.destination,
-        })
+        });
       }
       return {
         ...context,
         additionalWorkingDirectories: newAdditionalDirs,
-      }
+      };
     }
 
-    case 'removeRules': {
-      const ruleStrings = update.rules.map(rule =>
+    case "removeRules": {
+      const ruleStrings = update.rules.map((rule) =>
         permissionRuleValueToString(rule),
-      )
+      );
       logForDebugging(
         `Applying permission update: Removing ${update.rules.length} ${update.behavior} rule(s) from source '${update.destination}': ${jsonStringify(ruleStrings)}`,
-      )
+      );
 
       // Determine which collection to update based on behavior
       const ruleKind =
-        update.behavior === 'allow'
-          ? 'alwaysAllowRules'
-          : update.behavior === 'deny'
-            ? 'alwaysDenyRules'
-            : 'alwaysAskRules'
+        update.behavior === "allow"
+          ? "alwaysAllowRules"
+          : update.behavior === "deny"
+            ? "alwaysDenyRules"
+            : "alwaysAskRules";
 
       // Filter out the rules to be removed
-      const existingRules = context[ruleKind][update.destination] || []
-      const rulesToRemove = new Set(ruleStrings)
+      const existingRules = context[ruleKind][update.destination] || [];
+      const rulesToRemove = new Set(ruleStrings);
       const filteredRules = existingRules.filter(
-        rule => !rulesToRemove.has(rule),
-      )
+        (rule) => !rulesToRemove.has(rule),
+      );
 
       return {
         ...context,
@@ -165,25 +165,25 @@ export function applyPermissionUpdate(
           ...context[ruleKind],
           [update.destination]: filteredRules,
         },
-      }
+      };
     }
 
-    case 'removeDirectories': {
+    case "removeDirectories": {
       logForDebugging(
-        `Applying permission update: Removing ${update.directories.length} director${update.directories.length === 1 ? 'y' : 'ies'}: ${jsonStringify(update.directories)}`,
-      )
-      const newAdditionalDirs = new Map(context.additionalWorkingDirectories)
+        `Applying permission update: Removing ${update.directories.length} director${update.directories.length === 1 ? "y" : "ies"}: ${jsonStringify(update.directories)}`,
+      );
+      const newAdditionalDirs = new Map(context.additionalWorkingDirectories);
       for (const directory of update.directories) {
-        newAdditionalDirs.delete(directory)
+        newAdditionalDirs.delete(directory);
       }
       return {
         ...context,
         additionalWorkingDirectories: newAdditionalDirs,
-      }
+      };
     }
 
     default:
-      return context
+      return context;
   }
 }
 
@@ -197,22 +197,22 @@ export function applyPermissionUpdates(
   context: ToolPermissionContext,
   updates: PermissionUpdate[],
 ): ToolPermissionContext {
-  let updatedContext = context
+  let updatedContext = context;
   for (const update of updates) {
-    updatedContext = applyPermissionUpdate(updatedContext, update)
+    updatedContext = applyPermissionUpdate(updatedContext, update);
   }
 
-  return updatedContext
+  return updatedContext;
 }
 
 export function supportsPersistence(
   destination: PermissionUpdateDestination,
 ): destination is EditableSettingSource {
   return (
-    destination === 'localSettings' ||
-    destination === 'userSettings' ||
-    destination === 'projectSettings'
-  )
+    destination === "localSettings" ||
+    destination === "userSettings" ||
+    destination === "projectSettings"
+  );
 }
 
 /**
@@ -220,123 +220,123 @@ export function supportsPersistence(
  * @param update The permission update to persist
  */
 export function persistPermissionUpdate(update: PermissionUpdate): void {
-  if (!supportsPersistence(update.destination)) return
+  if (!supportsPersistence(update.destination)) return;
 
   logForDebugging(
     `Persisting permission update: ${update.type} to source '${update.destination}'`,
-  )
+  );
 
   switch (update.type) {
-    case 'addRules': {
+    case "addRules": {
       logForDebugging(
         `Persisting ${update.rules.length} ${update.behavior} rule(s) to ${update.destination}`,
-      )
+      );
       addPermissionRulesToSettings(
         {
           ruleValues: update.rules,
           ruleBehavior: update.behavior,
         },
         update.destination,
-      )
-      break
+      );
+      break;
     }
 
-    case 'addDirectories': {
+    case "addDirectories": {
       logForDebugging(
-        `Persisting ${update.directories.length} director${update.directories.length === 1 ? 'y' : 'ies'} to ${update.destination}`,
-      )
-      const existingSettings = getSettingsForSource(update.destination)
+        `Persisting ${update.directories.length} director${update.directories.length === 1 ? "y" : "ies"} to ${update.destination}`,
+      );
+      const existingSettings = getSettingsForSource(update.destination);
       const existingDirs =
-        existingSettings?.permissions?.additionalDirectories || []
+        existingSettings?.permissions?.additionalDirectories || [];
 
       // Add new directories, avoiding duplicates
       const dirsToAdd = update.directories.filter(
-        dir => !existingDirs.includes(dir),
-      )
+        (dir) => !existingDirs.includes(dir),
+      );
 
       if (dirsToAdd.length > 0) {
-        const updatedDirs = [...existingDirs, ...dirsToAdd]
+        const updatedDirs = [...existingDirs, ...dirsToAdd];
         updateSettingsForSource(update.destination, {
           permissions: {
             additionalDirectories: updatedDirs,
           },
-        })
+        });
       }
-      break
+      break;
     }
 
-    case 'removeRules': {
+    case "removeRules": {
       // Handle rule removal
       logForDebugging(
         `Removing ${update.rules.length} ${update.behavior} rule(s) from ${update.destination}`,
-      )
-      const existingSettings = getSettingsForSource(update.destination)
-      const existingPermissions = existingSettings?.permissions || {}
-      const existingRules = existingPermissions[update.behavior] || []
+      );
+      const existingSettings = getSettingsForSource(update.destination);
+      const existingPermissions = existingSettings?.permissions || {};
+      const existingRules = existingPermissions[update.behavior] || [];
 
       // Convert rules to normalized strings for comparison
       // Normalize via parse→serialize roundtrip so "Bash(*)" and "Bash" match
       const rulesToRemove = new Set(
         update.rules.map(permissionRuleValueToString),
-      )
-      const filteredRules = existingRules.filter(rule => {
+      );
+      const filteredRules = existingRules.filter((rule) => {
         const normalized = permissionRuleValueToString(
           permissionRuleValueFromString(rule),
-        )
-        return !rulesToRemove.has(normalized)
-      })
+        );
+        return !rulesToRemove.has(normalized);
+      });
 
       updateSettingsForSource(update.destination, {
         permissions: {
           [update.behavior]: filteredRules,
         },
-      })
-      break
+      });
+      break;
     }
 
-    case 'removeDirectories': {
+    case "removeDirectories": {
       logForDebugging(
-        `Removing ${update.directories.length} director${update.directories.length === 1 ? 'y' : 'ies'} from ${update.destination}`,
-      )
-      const existingSettings = getSettingsForSource(update.destination)
+        `Removing ${update.directories.length} director${update.directories.length === 1 ? "y" : "ies"} from ${update.destination}`,
+      );
+      const existingSettings = getSettingsForSource(update.destination);
       const existingDirs =
-        existingSettings?.permissions?.additionalDirectories || []
+        existingSettings?.permissions?.additionalDirectories || [];
 
       // Remove specified directories
-      const dirsToRemove = new Set(update.directories)
-      const filteredDirs = existingDirs.filter(dir => !dirsToRemove.has(dir))
+      const dirsToRemove = new Set(update.directories);
+      const filteredDirs = existingDirs.filter((dir) => !dirsToRemove.has(dir));
 
       updateSettingsForSource(update.destination, {
         permissions: {
           additionalDirectories: filteredDirs,
         },
-      })
-      break
+      });
+      break;
     }
 
-    case 'setMode': {
+    case "setMode": {
       logForDebugging(
         `Persisting mode '${update.mode}' to ${update.destination}`,
-      )
+      );
       updateSettingsForSource(update.destination, {
         permissions: {
           defaultMode: update.mode,
         },
-      })
-      break
+      });
+      break;
     }
 
-    case 'replaceRules': {
+    case "replaceRules": {
       logForDebugging(
         `Replacing all ${update.behavior} rules in ${update.destination} with ${update.rules.length} rule(s)`,
-      )
-      const ruleStrings = update.rules.map(permissionRuleValueToString)
+      );
+      const ruleStrings = update.rules.map(permissionRuleValueToString);
       updateSettingsForSource(update.destination, {
         permissions: {
           [update.behavior]: ruleStrings,
         },
-      })
-      break
+      });
+      break;
     }
   }
 }
@@ -348,7 +348,7 @@ export function persistPermissionUpdate(update: PermissionUpdate): void {
  */
 export function persistPermissionUpdates(updates: PermissionUpdate[]): void {
   for (const update of updates) {
-    persistPermissionUpdate(update)
+    persistPermissionUpdate(update);
   }
 }
 
@@ -360,30 +360,30 @@ export function persistPermissionUpdates(updates: PermissionUpdate[]): void {
  */
 export function createReadRuleSuggestion(
   dirPath: string,
-  destination: PermissionUpdateDestination = 'session',
+  destination: PermissionUpdateDestination = "session",
 ): PermissionUpdate | undefined {
   // Convert to POSIX format for pattern matching (handles Windows internally)
-  const pathForPattern = toPosixPath(dirPath)
+  const pathForPattern = toPosixPath(dirPath);
 
   // Root directory is too broad to be a reasonable permission target
-  if (pathForPattern === '/') {
-    return undefined
+  if (pathForPattern === "/") {
+    return undefined;
   }
 
   // For absolute paths, prepend an extra / to create //path/** pattern
   const ruleContent = posix.isAbsolute(pathForPattern)
     ? `/${pathForPattern}/**`
-    : `${pathForPattern}/**`
+    : `${pathForPattern}/**`;
 
   return {
-    type: 'addRules',
+    type: "addRules",
     rules: [
       {
-        toolName: 'Read',
+        toolName: "Read",
         ruleContent,
       },
     ],
-    behavior: 'allow',
+    behavior: "allow",
     destination,
-  }
+  };
 }

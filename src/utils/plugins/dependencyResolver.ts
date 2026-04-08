@@ -11,18 +11,18 @@
  *    unsatisfied deps (session-local, does NOT write settings)
  */
 
-import type { LoadedPlugin, PluginError } from '../../types/plugin.js'
-import type { EditableSettingSource } from '../settings/constants.js'
-import { getSettingsForSource } from '../settings/settings.js'
-import { parsePluginIdentifier } from './pluginIdentifier.js'
-import type { PluginId } from './schemas.js'
+import type { LoadedPlugin, PluginError } from "../../types/plugin.js";
+import type { EditableSettingSource } from "../settings/constants.js";
+import { getSettingsForSource } from "../settings/settings.js";
+import { parsePluginIdentifier } from "./pluginIdentifier.js";
+import type { PluginId } from "./schemas.js";
 
 /**
  * Synthetic marketplace sentinel for `--plugin-dir` plugins (pluginLoader.ts
  * sets `source = "{name}@inline"`). Not a real marketplace — bare deps from
  * these plugins cannot meaningfully inherit it.
  */
-const INLINE_MARKETPLACE = 'inline'
+const INLINE_MARKETPLACE = "inline";
 
 /**
  * Normalize a dependency reference to fully-qualified "name@marketplace" form.
@@ -39,10 +39,10 @@ export function qualifyDependency(
   dep: string,
   declaringPluginId: string,
 ): string {
-  if (parsePluginIdentifier(dep).marketplace) return dep
-  const mkt = parsePluginIdentifier(declaringPluginId).marketplace
-  if (!mkt || mkt === INLINE_MARKETPLACE) return dep
-  return `${dep}@${mkt}`
+  if (parsePluginIdentifier(dep).marketplace) return dep;
+  const mkt = parsePluginIdentifier(declaringPluginId).marketplace;
+  if (!mkt || mkt === INLINE_MARKETPLACE) return dep;
+  return `${dep}@${mkt}`;
 }
 
 /**
@@ -52,19 +52,19 @@ export function qualifyDependency(
  */
 export type DependencyLookupResult = {
   // Entries may be bare names; qualifyDependency normalizes them.
-  dependencies?: string[]
-}
+  dependencies?: string[];
+};
 
 export type ResolutionResult =
   | { ok: true; closure: PluginId[] }
-  | { ok: false; reason: 'cycle'; chain: PluginId[] }
-  | { ok: false; reason: 'not-found'; missing: PluginId; requiredBy: PluginId }
+  | { ok: false; reason: "cycle"; chain: PluginId[] }
+  | { ok: false; reason: "not-found"; missing: PluginId; requiredBy: PluginId }
   | {
-      ok: false
-      reason: 'cross-marketplace'
-      dependency: PluginId
-      requiredBy: PluginId
-    }
+      ok: false;
+      reason: "cross-marketplace";
+      dependency: PluginId;
+      requiredBy: PluginId;
+    };
 
 /**
  * Walk the transitive dependency closure of `rootId` via DFS.
@@ -98,10 +98,10 @@ export async function resolveDependencyClosure(
   alreadyEnabled: ReadonlySet<PluginId>,
   allowedCrossMarketplaces: ReadonlySet<string> = new Set(),
 ): Promise<ResolutionResult> {
-  const rootMarketplace = parsePluginIdentifier(rootId).marketplace
-  const closure: PluginId[] = []
-  const visited = new Set<PluginId>()
-  const stack: PluginId[] = []
+  const rootMarketplace = parsePluginIdentifier(rootId).marketplace;
+  const closure: PluginId[] = [];
+  const visited = new Set<PluginId>();
+  const stack: PluginId[] = [];
 
   async function walk(
     id: PluginId,
@@ -114,48 +114,48 @@ export async function resolveDependencyClosure(
     // installed_plugins.json stale) would return an empty closure and
     // `cacheAndRegisterPlugin` would never fire — user sees
     // "✔ Successfully installed" but nothing materializes.
-    if (id !== rootId && alreadyEnabled.has(id)) return null
+    if (id !== rootId && alreadyEnabled.has(id)) return null;
     // Security: block auto-install across marketplace boundaries. Runs AFTER
     // the alreadyEnabled check — if the user manually installed a cross-mkt
     // dep, it's in alreadyEnabled and we never reach this.
-    const idMarketplace = parsePluginIdentifier(id).marketplace
+    const idMarketplace = parsePluginIdentifier(id).marketplace;
     if (
       idMarketplace !== rootMarketplace &&
       !(idMarketplace && allowedCrossMarketplaces.has(idMarketplace))
     ) {
       return {
         ok: false,
-        reason: 'cross-marketplace',
+        reason: "cross-marketplace",
         dependency: id,
         requiredBy,
-      }
+      };
     }
     if (stack.includes(id)) {
-      return { ok: false, reason: 'cycle', chain: [...stack, id] }
+      return { ok: false, reason: "cycle", chain: [...stack, id] };
     }
-    if (visited.has(id)) return null
-    visited.add(id)
+    if (visited.has(id)) return null;
+    visited.add(id);
 
-    const entry = await lookup(id)
+    const entry = await lookup(id);
     if (!entry) {
-      return { ok: false, reason: 'not-found', missing: id, requiredBy }
+      return { ok: false, reason: "not-found", missing: id, requiredBy };
     }
 
-    stack.push(id)
+    stack.push(id);
     for (const rawDep of entry.dependencies ?? []) {
-      const dep = qualifyDependency(rawDep, id)
-      const err = await walk(dep, id)
-      if (err) return err
+      const dep = qualifyDependency(rawDep, id);
+      const err = await walk(dep, id);
+      if (err) return err;
     }
-    stack.pop()
+    stack.pop();
 
-    closure.push(id)
-    return null
+    closure.push(id);
+    return null;
   }
 
-  const err = await walk(rootId, rootId)
-  if (err) return err
-  return { ok: true, closure }
+  const err = await walk(rootId, rootId);
+  if (err) return err;
+  return { ok: true, closure };
 }
 
 /**
@@ -175,62 +175,66 @@ export async function resolveDependencyClosure(
  * @returns Set of pluginIds to demote, plus errors for `/doctor`
  */
 export function verifyAndDemote(plugins: readonly LoadedPlugin[]): {
-  demoted: Set<string>
-  errors: PluginError[]
+  demoted: Set<string>;
+  errors: PluginError[];
 } {
-  const known = new Set(plugins.map(p => p.source))
-  const enabled = new Set(plugins.filter(p => p.enabled).map(p => p.source))
+  const known = new Set(plugins.map((p) => p.source));
+  const enabled = new Set(
+    plugins.filter((p) => p.enabled).map((p) => p.source),
+  );
   // Name-only indexes for bare deps from --plugin-dir (@inline) plugins:
   // the real marketplace is unknown, so match "B" against any enabled "B@*".
   // enabledByName is a multiset: if B@epic AND B@other are both enabled,
   // demoting one mustn't make "B" disappear from the index.
   const knownByName = new Set(
-    plugins.map(p => parsePluginIdentifier(p.source).name),
-  )
-  const enabledByName = new Map<string, number>()
+    plugins.map((p) => parsePluginIdentifier(p.source).name),
+  );
+  const enabledByName = new Map<string, number>();
   for (const id of enabled) {
-    const n = parsePluginIdentifier(id).name
-    enabledByName.set(n, (enabledByName.get(n) ?? 0) + 1)
+    const n = parsePluginIdentifier(id).name;
+    enabledByName.set(n, (enabledByName.get(n) ?? 0) + 1);
   }
-  const errors: PluginError[] = []
+  const errors: PluginError[] = [];
 
-  let changed = true
+  let changed = true;
   while (changed) {
-    changed = false
+    changed = false;
     for (const p of plugins) {
-      if (!enabled.has(p.source)) continue
+      if (!enabled.has(p.source)) continue;
       for (const rawDep of p.manifest.dependencies ?? []) {
-        const dep = qualifyDependency(rawDep, p.source)
+        const dep = qualifyDependency(rawDep, p.source);
         // Bare dep ← @inline plugin: match by name only (see enabledByName)
-        const isBare = !parsePluginIdentifier(dep).marketplace
+        const isBare = !parsePluginIdentifier(dep).marketplace;
         const satisfied = isBare
           ? (enabledByName.get(dep) ?? 0) > 0
-          : enabled.has(dep)
+          : enabled.has(dep);
         if (!satisfied) {
-          enabled.delete(p.source)
-          const count = enabledByName.get(p.name) ?? 0
-          if (count <= 1) enabledByName.delete(p.name)
-          else enabledByName.set(p.name, count - 1)
+          enabled.delete(p.source);
+          const count = enabledByName.get(p.name) ?? 0;
+          if (count <= 1) enabledByName.delete(p.name);
+          else enabledByName.set(p.name, count - 1);
           errors.push({
-            type: 'dependency-unsatisfied',
+            type: "dependency-unsatisfied",
             source: p.source,
             plugin: p.name,
             dependency: dep,
             reason: (isBare ? knownByName.has(dep) : known.has(dep))
-              ? 'not-enabled'
-              : 'not-found',
-          })
-          changed = true
-          break
+              ? "not-enabled"
+              : "not-found",
+          });
+          changed = true;
+          break;
         }
       }
     }
   }
 
   const demoted = new Set(
-    plugins.filter(p => p.enabled && !enabled.has(p.source)).map(p => p.source),
-  )
-  return { demoted, errors }
+    plugins
+      .filter((p) => p.enabled && !enabled.has(p.source))
+      .map((p) => p.source),
+  );
+  return { demoted, errors };
 }
 
 /**
@@ -245,21 +249,21 @@ export function findReverseDependents(
   pluginId: PluginId,
   plugins: readonly LoadedPlugin[],
 ): string[] {
-  const { name: targetName } = parsePluginIdentifier(pluginId)
+  const { name: targetName } = parsePluginIdentifier(pluginId);
   return plugins
     .filter(
-      p =>
+      (p) =>
         p.enabled &&
         p.source !== pluginId &&
-        (p.manifest.dependencies ?? []).some(d => {
-          const qualified = qualifyDependency(d, p.source)
+        (p.manifest.dependencies ?? []).some((d) => {
+          const qualified = qualifyDependency(d, p.source);
           // Bare dep (from @inline plugin): match by name only
           return parsePluginIdentifier(qualified).marketplace
             ? qualified === pluginId
-            : qualified === targetName
+            : qualified === targetName;
         }),
     )
-    .map(p => p.name)
+    .map((p) => p.name);
 }
 
 /**
@@ -279,7 +283,7 @@ export function getEnabledPluginIdsForScope(
     Object.entries(getSettingsForSource(settingSource)?.enabledPlugins ?? {})
       .filter(([, v]) => v === true || Array.isArray(v))
       .map(([k]) => k),
-  )
+  );
 }
 
 /**
@@ -287,9 +291,9 @@ export function getEnabledPluginIdsForScope(
  * Returns empty string when `installedDeps` is empty.
  */
 export function formatDependencyCountSuffix(installedDeps: string[]): string {
-  if (installedDeps.length === 0) return ''
-  const n = installedDeps.length
-  return ` (+ ${n} ${n === 1 ? 'dependency' : 'dependencies'})`
+  if (installedDeps.length === 0) return "";
+  const n = installedDeps.length;
+  return ` (+ ${n} ${n === 1 ? "dependency" : "dependencies"})`;
 }
 
 /**
@@ -300,6 +304,6 @@ export function formatDependencyCountSuffix(installedDeps: string[]): string {
 export function formatReverseDependentsSuffix(
   rdeps: string[] | undefined,
 ): string {
-  if (!rdeps || rdeps.length === 0) return ''
-  return ` — warning: required by ${rdeps.join(', ')}`
+  if (!rdeps || rdeps.length === 0) return "";
+  return ` — warning: required by ${rdeps.join(", ")}`;
 }

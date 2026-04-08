@@ -1,15 +1,15 @@
 type ContextCollapseStats = {
-  collapsedSpans: number
-  collapsedMessages: number
-  stagedSpans: number
+  collapsedSpans: number;
+  collapsedMessages: number;
+  stagedSpans: number;
   health: {
-    totalErrors: number
-    totalEmptySpawns: number
-    totalSpawns: number
-    emptySpawnWarningEmitted: boolean
-    lastError: string | null
-  }
-}
+    totalErrors: number;
+    totalEmptySpawns: number;
+    totalSpawns: number;
+    emptySpawnWarningEmitted: boolean;
+    lastError: string | null;
+  };
+};
 
 const EMPTY_STATS: ContextCollapseStats = {
   collapsedSpans: 0,
@@ -22,22 +22,22 @@ const EMPTY_STATS: ContextCollapseStats = {
     emptySpawnWarningEmitted: false,
     lastError: null,
   },
-}
+};
 
 export function initContextCollapse(): void {}
 
 export function resetContextCollapse(): void {}
 
 export function isContextCollapseEnabled(): boolean {
-  return false
+  return false;
 }
 
 export function getStats(): ContextCollapseStats {
-  return EMPTY_STATS
+  return EMPTY_STATS;
 }
 
 export function subscribe(_callback: () => void): () => void {
-  return () => {}
+  return () => {};
 }
 
 export async function applyCollapsesIfNeeded<T>(
@@ -45,7 +45,7 @@ export async function applyCollapsesIfNeeded<T>(
   _toolUseContext: unknown,
   _querySource?: string,
 ): Promise<{ messages: T[] }> {
-  return { messages }
+  return { messages };
 }
 
 export function recoverFromOverflow<T>(
@@ -55,7 +55,7 @@ export function recoverFromOverflow<T>(
   return {
     messages,
     committed: 0,
-  }
+  };
 }
 
 export function isWithheldPromptTooLong(
@@ -63,5 +63,5 @@ export function isWithheldPromptTooLong(
   _isPromptTooLongMessage: (message: unknown) => boolean,
   _querySource?: string,
 ): boolean {
-  return false
+  return false;
 }

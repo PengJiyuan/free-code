@@ -6,7 +6,7 @@
  */
 export function isRunningWithBun(): boolean {
   // https://bun.com/guides/util/detect-bun
-  return process.versions.bun !== undefined
+  return process.versions.bun !== undefined;
 }
 
 /**
@@ -15,8 +15,8 @@ export function isRunningWithBun(): boolean {
  */
 export function isInBundledMode(): boolean {
   return (
-    typeof Bun !== 'undefined' &&
+    typeof Bun !== "undefined" &&
     Array.isArray(Bun.embeddedFiles) &&
     Bun.embeddedFiles.length > 0
-  )
+  );
 }

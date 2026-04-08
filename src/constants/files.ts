@@ -4,125 +4,125 @@
  */
 export const BINARY_EXTENSIONS = new Set([
   // Images
-  '.png',
-  '.jpg',
-  '.jpeg',
-  '.gif',
-  '.bmp',
-  '.ico',
-  '.webp',
-  '.tiff',
-  '.tif',
+  ".png",
+  ".jpg",
+  ".jpeg",
+  ".gif",
+  ".bmp",
+  ".ico",
+  ".webp",
+  ".tiff",
+  ".tif",
   // Videos
-  '.mp4',
-  '.mov',
-  '.avi',
-  '.mkv',
-  '.webm',
-  '.wmv',
-  '.flv',
-  '.m4v',
-  '.mpeg',
-  '.mpg',
+  ".mp4",
+  ".mov",
+  ".avi",
+  ".mkv",
+  ".webm",
+  ".wmv",
+  ".flv",
+  ".m4v",
+  ".mpeg",
+  ".mpg",
   // Audio
-  '.mp3',
-  '.wav',
-  '.ogg',
-  '.flac',
-  '.aac',
-  '.m4a',
-  '.wma',
-  '.aiff',
-  '.opus',
+  ".mp3",
+  ".wav",
+  ".ogg",
+  ".flac",
+  ".aac",
+  ".m4a",
+  ".wma",
+  ".aiff",
+  ".opus",
   // Archives
-  '.zip',
-  '.tar',
-  '.gz',
-  '.bz2',
-  '.7z',
-  '.rar',
-  '.xz',
-  '.z',
-  '.tgz',
-  '.iso',
+  ".zip",
+  ".tar",
+  ".gz",
+  ".bz2",
+  ".7z",
+  ".rar",
+  ".xz",
+  ".z",
+  ".tgz",
+  ".iso",
   // Executables/binaries
-  '.exe',
-  '.dll',
-  '.so',
-  '.dylib',
-  '.bin',
-  '.o',
-  '.a',
-  '.obj',
-  '.lib',
-  '.app',
-  '.msi',
-  '.deb',
-  '.rpm',
+  ".exe",
+  ".dll",
+  ".so",
+  ".dylib",
+  ".bin",
+  ".o",
+  ".a",
+  ".obj",
+  ".lib",
+  ".app",
+  ".msi",
+  ".deb",
+  ".rpm",
   // Documents (PDF is here; FileReadTool excludes it at the call site)
-  '.pdf',
-  '.doc',
-  '.docx',
-  '.xls',
-  '.xlsx',
-  '.ppt',
-  '.pptx',
-  '.odt',
-  '.ods',
-  '.odp',
+  ".pdf",
+  ".doc",
+  ".docx",
+  ".xls",
+  ".xlsx",
+  ".ppt",
+  ".pptx",
+  ".odt",
+  ".ods",
+  ".odp",
   // Fonts
-  '.ttf',
-  '.otf',
-  '.woff',
-  '.woff2',
-  '.eot',
+  ".ttf",
+  ".otf",
+  ".woff",
+  ".woff2",
+  ".eot",
   // Bytecode / VM artifacts
-  '.pyc',
-  '.pyo',
-  '.class',
-  '.jar',
-  '.war',
-  '.ear',
-  '.node',
-  '.wasm',
-  '.rlib',
+  ".pyc",
+  ".pyo",
+  ".class",
+  ".jar",
+  ".war",
+  ".ear",
+  ".node",
+  ".wasm",
+  ".rlib",
   // Database files
-  '.sqlite',
-  '.sqlite3',
-  '.db',
-  '.mdb',
-  '.idx',
+  ".sqlite",
+  ".sqlite3",
+  ".db",
+  ".mdb",
+  ".idx",
   // Design / 3D
-  '.psd',
-  '.ai',
-  '.eps',
-  '.sketch',
-  '.fig',
-  '.xd',
-  '.blend',
-  '.3ds',
-  '.max',
+  ".psd",
+  ".ai",
+  ".eps",
+  ".sketch",
+  ".fig",
+  ".xd",
+  ".blend",
+  ".3ds",
+  ".max",
   // Flash
-  '.swf',
-  '.fla',
+  ".swf",
+  ".fla",
   // Lock/profiling data
-  '.lockb',
-  '.dat',
-  '.data',
-])
+  ".lockb",
+  ".dat",
+  ".data",
+]);
 
 /**
  * Check if a file path has a binary extension.
  */
 export function hasBinaryExtension(filePath: string): boolean {
-  const ext = filePath.slice(filePath.lastIndexOf('.')).toLowerCase()
-  return BINARY_EXTENSIONS.has(ext)
+  const ext = filePath.slice(filePath.lastIndexOf(".")).toLowerCase();
+  return BINARY_EXTENSIONS.has(ext);
 }
 
 /**
  * Number of bytes to read for binary content detection.
  */
-const BINARY_CHECK_SIZE = 8192
+const BINARY_CHECK_SIZE = 8192;
 
 /**
  * Check if a buffer contains binary content by looking for null bytes
@@ -130,14 +130,14 @@ const BINARY_CHECK_SIZE = 8192
  */
 export function isBinaryContent(buffer: Buffer): boolean {
   // Check first BINARY_CHECK_SIZE bytes (or full buffer if smaller)
-  const checkSize = Math.min(buffer.length, BINARY_CHECK_SIZE)
+  const checkSize = Math.min(buffer.length, BINARY_CHECK_SIZE);
 
-  let nonPrintable = 0
+  let nonPrintable = 0;
   for (let i = 0; i < checkSize; i++) {
-    const byte = buffer[i]!
+    const byte = buffer[i]!;
     // Null byte is a strong indicator of binary
     if (byte === 0) {
-      return true
+      return true;
     }
     // Count non-printable, non-whitespace bytes
     // Printable ASCII is 32-126, plus common whitespace (9, 10, 13)
@@ -147,10 +147,10 @@ export function isBinaryContent(buffer: Buffer): boolean {
       byte !== 10 && // newline
       byte !== 13 // carriage return
     ) {
-      nonPrintable++
+      nonPrintable++;
     }
   }
 
   // If more than 10% non-printable, likely binary
-  return nonPrintable / checkSize > 0.1
+  return nonPrintable / checkSize > 0.1;
 }

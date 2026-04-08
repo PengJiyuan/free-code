@@ -3,33 +3,33 @@
  */
 
 export interface Span {
-  setAttribute(name: string, value: string | number | boolean): void
-  setAttributes(attributes: Record<string, string | number | boolean>): void
+  setAttribute(name: string, value: string | number | boolean): void;
+  setAttributes(attributes: Record<string, string | number | boolean>): void;
   addEvent(
     name: string,
     attributes?: Record<string, string | number | boolean>,
-  ): void
-  end(): void
-  recordException(error: unknown): void
+  ): void;
+  end(): void;
+  recordException(error: unknown): void;
 }
 
 export interface LLMRequestNewContext {
-  systemPrompt?: string
-  querySource?: string
-  tools?: string
+  systemPrompt?: string;
+  querySource?: string;
+  tools?: string;
 }
 
 export function clearBetaTracingState(): void {}
 
 export function isBetaTracingEnabled(): boolean {
-  return false
+  return false;
 }
 
 export function truncateContent(
   content: string,
   _maxSize?: number,
 ): { content: string; truncated: boolean } {
-  return { content, truncated: false }
+  return { content, truncated: false };
 }
 
 export function addBetaInteractionAttributes(
@@ -46,8 +46,8 @@ export function addBetaLLMRequestAttributes(
 export function addBetaLLMResponseAttributes(
   _endAttributes: Record<string, string | number | boolean>,
   _metadata?: {
-    modelOutput?: string
-    thinkingOutput?: string
+    modelOutput?: string;
+    thinkingOutput?: string;
   },
 ): void {}
 

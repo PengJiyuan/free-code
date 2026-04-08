@@ -1,14 +1,14 @@
-import { useEffect, useState } from 'react'
-import type { PastedContent } from 'src/utils/config.js'
-import { maybeTruncateInput } from './inputPaste.js'
+import { useEffect, useState } from "react";
+import type { PastedContent } from "src/utils/config.js";
+import { maybeTruncateInput } from "./inputPaste.js";
 
 type Props = {
-  input: string
-  pastedContents: Record<number, PastedContent>
-  onInputChange: (input: string) => void
-  setCursorOffset: (offset: number) => void
-  setPastedContents: (contents: Record<number, PastedContent>) => void
-}
+  input: string;
+  pastedContents: Record<number, PastedContent>;
+  onInputChange: (input: string) => void;
+  setCursorOffset: (offset: number) => void;
+  setPastedContents: (contents: Record<number, PastedContent>) => void;
+};
 
 export function useMaybeTruncateInput({
   input,
@@ -19,27 +19,27 @@ export function useMaybeTruncateInput({
 }: Props) {
   // Track if we've initialized this specific input value
   const [hasAppliedTruncationToInput, setHasAppliedTruncationToInput] =
-    useState(false)
+    useState(false);
 
   // Process input for truncation and pasted images from MessageSelector.
   useEffect(() => {
     if (hasAppliedTruncationToInput) {
-      return
+      return;
     }
 
     if (input.length <= 10_000) {
-      return
+      return;
     }
 
     const { newInput, newPastedContents } = maybeTruncateInput(
       input,
       pastedContents,
-    )
+    );
 
-    onInputChange(newInput)
-    setCursorOffset(newInput.length)
-    setPastedContents(newPastedContents)
-    setHasAppliedTruncationToInput(true)
+    onInputChange(newInput);
+    setCursorOffset(newInput.length);
+    setPastedContents(newPastedContents);
+    setHasAppliedTruncationToInput(true);
   }, [
     input,
     hasAppliedTruncationToInput,
@@ -47,12 +47,12 @@ export function useMaybeTruncateInput({
     onInputChange,
     setPastedContents,
     setCursorOffset,
-  ])
+  ]);
 
   // Reset hasInitializedInput when input is cleared (e.g., after submission)
   useEffect(() => {
-    if (input === '') {
-      setHasAppliedTruncationToInput(false)
+    if (input === "") {
+      setHasAppliedTruncationToInput(false);
     }
-  }, [input])
+  }, [input]);
 }

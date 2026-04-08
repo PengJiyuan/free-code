@@ -1,5 +1,5 @@
-import type { SdkWorkflowProgress } from '../../types/tools.js'
-import { enqueueSdkEvent } from '../sdkEventQueue.js'
+import type { SdkWorkflowProgress } from "../../types/tools.js";
+import { enqueueSdkEvent } from "../sdkEventQueue.js";
 
 /**
  * Emit a `task_progress` SDK event. Shared by background agents (per tool_use
@@ -8,19 +8,19 @@ import { enqueueSdkEvent } from '../sdkEventQueue.js'
  * shapes (ProgressTracker for agents, LocalWorkflowTaskState for workflows).
  */
 export function emitTaskProgress(params: {
-  taskId: string
-  toolUseId: string | undefined
-  description: string
-  startTime: number
-  totalTokens: number
-  toolUses: number
-  lastToolName?: string
-  summary?: string
-  workflowProgress?: SdkWorkflowProgress[]
+  taskId: string;
+  toolUseId: string | undefined;
+  description: string;
+  startTime: number;
+  totalTokens: number;
+  toolUses: number;
+  lastToolName?: string;
+  summary?: string;
+  workflowProgress?: SdkWorkflowProgress[];
 }): void {
   enqueueSdkEvent({
-    type: 'system',
-    subtype: 'task_progress',
+    type: "system",
+    subtype: "task_progress",
     task_id: params.taskId,
     tool_use_id: params.toolUseId,
     description: params.description,
@@ -32,5 +32,5 @@ export function emitTaskProgress(params: {
     last_tool_name: params.lastToolName,
     summary: params.summary,
     workflow_progress: params.workflowProgress,
-  })
+  });
 }

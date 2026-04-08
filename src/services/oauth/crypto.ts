@@ -1,4 +1,4 @@
-import { createHash, randomBytes } from 'crypto'
+import { createHash, randomBytes } from "crypto";
 
 /**
  * Encodes a buffer to base64URL format (RFC 4648).
@@ -7,10 +7,10 @@ import { createHash, randomBytes } from 'crypto'
  */
 function base64URLEncode(buffer: Buffer): string {
   return buffer
-    .toString('base64')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=/g, '')
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=/g, "");
 }
 
 /**
@@ -18,7 +18,7 @@ function base64URLEncode(buffer: Buffer): string {
  * @returns A cryptographically random code verifier string
  */
 export function generateCodeVerifier(): string {
-  return base64URLEncode(randomBytes(32))
+  return base64URLEncode(randomBytes(32));
 }
 
 /**
@@ -27,9 +27,9 @@ export function generateCodeVerifier(): string {
  * @returns The SHA256 hash of the verifier, base64URL encoded
  */
 export function generateCodeChallenge(verifier: string): string {
-  const hash = createHash('sha256')
-  hash.update(verifier)
-  return base64URLEncode(hash.digest())
+  const hash = createHash("sha256");
+  hash.update(verifier);
+  return base64URLEncode(hash.digest());
 }
 
 /**
@@ -37,5 +37,5 @@ export function generateCodeChallenge(verifier: string): string {
  * @returns A cryptographically random state string
  */
 export function generateState(): string {
-  return base64URLEncode(randomBytes(32))
+  return base64URLEncode(randomBytes(32));
 }

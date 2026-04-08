@@ -1,22 +1,22 @@
 import {
   isBetaTracingEnabled,
   type LLMRequestNewContext,
-} from './betaSessionTracing.js'
+} from "./betaSessionTracing.js";
 
-export { isBetaTracingEnabled, type LLMRequestNewContext }
+export { isBetaTracingEnabled, type LLMRequestNewContext };
 
 export interface Span {
-  setAttribute(name: string, value: string | number | boolean): void
-  setAttributes(attributes: Record<string, string | number | boolean>): void
+  setAttribute(name: string, value: string | number | boolean): void;
+  setAttributes(attributes: Record<string, string | number | boolean>): void;
   addEvent(
     name: string,
     attributes?: Record<string, string | number | boolean>,
-  ): void
-  end(): void
-  recordException(error: unknown): void
+  ): void;
+  end(): void;
+  recordException(error: unknown): void;
 }
 
-type SpanMetadata = Record<string, string | number | boolean>
+type SpanMetadata = Record<string, string | number | boolean>;
 
 function createNoopSpan(): Span {
   return {
@@ -25,24 +25,24 @@ function createNoopSpan(): Span {
     addEvent() {},
     end() {},
     recordException() {},
-  }
+  };
 }
 
-let currentInteractionSpan: Span | null = null
-let currentToolSpan: Span | null = null
+let currentInteractionSpan: Span | null = null;
+let currentToolSpan: Span | null = null;
 
 export function isEnhancedTelemetryEnabled(): boolean {
-  return false
+  return false;
 }
 
 export function startInteractionSpan(_userPrompt: string): Span {
-  const span = createNoopSpan()
-  currentInteractionSpan = span
-  return span
+  const span = createNoopSpan();
+  currentInteractionSpan = span;
+  return span;
 }
 
 export function endInteractionSpan(): void {
-  currentInteractionSpan = null
+  currentInteractionSpan = null;
 }
 
 export function startLLMRequestSpan(
@@ -51,27 +51,27 @@ export function startLLMRequestSpan(
   _messagesForAPI?: unknown[],
   _fastMode?: boolean,
 ): Span {
-  return createNoopSpan()
+  return createNoopSpan();
 }
 
 export function endLLMRequestSpan(
   _span?: Span,
   _metadata?: {
-    inputTokens?: number
-    outputTokens?: number
-    cacheReadTokens?: number
-    cacheCreationTokens?: number
-    success?: boolean
-    statusCode?: number
-    error?: string
-    attempt?: number
-    modelResponse?: string
-    modelOutput?: string
-    thinkingOutput?: string
-    hasToolCall?: boolean
-    ttftMs?: number
-    requestSetupMs?: number
-    attemptStartTimes?: number[]
+    inputTokens?: number;
+    outputTokens?: number;
+    cacheReadTokens?: number;
+    cacheCreationTokens?: number;
+    success?: boolean;
+    statusCode?: number;
+    error?: string;
+    attempt?: number;
+    modelResponse?: string;
+    modelOutput?: string;
+    thinkingOutput?: string;
+    hasToolCall?: boolean;
+    ttftMs?: number;
+    requestSetupMs?: number;
+    attemptStartTimes?: number[];
   },
 ): void {}
 
@@ -80,13 +80,13 @@ export function startToolSpan(
   _toolAttributes?: SpanMetadata,
   _toolInput?: string,
 ): Span {
-  const span = createNoopSpan()
-  currentToolSpan = span
-  return span
+  const span = createNoopSpan();
+  currentToolSpan = span;
+  return span;
 }
 
 export function startToolBlockedOnUserSpan(): Span {
-  return createNoopSpan()
+  return createNoopSpan();
 }
 
 export function endToolBlockedOnUserSpan(
@@ -95,19 +95,19 @@ export function endToolBlockedOnUserSpan(
 ): void {}
 
 export function startToolExecutionSpan(): Span {
-  return createNoopSpan()
+  return createNoopSpan();
 }
 
 export function endToolExecutionSpan(_metadata?: {
-  success?: boolean
-  error?: string
+  success?: boolean;
+  error?: string;
 }): void {}
 
 export function endToolSpan(
   _toolResult?: string,
   _resultTokens?: number,
 ): void {
-  currentToolSpan = null
+  currentToolSpan = null;
 }
 
 export function addToolContentEvent(
@@ -116,7 +116,7 @@ export function addToolContentEvent(
 ): void {}
 
 export function getCurrentSpan(): Span | null {
-  return currentToolSpan ?? currentInteractionSpan
+  return currentToolSpan ?? currentInteractionSpan;
 }
 
 export async function executeInSpan<T>(
@@ -124,7 +124,7 @@ export async function executeInSpan<T>(
   fn: (span: Span) => Promise<T>,
   _attributes?: SpanMetadata,
 ): Promise<T> {
-  return fn(createNoopSpan())
+  return fn(createNoopSpan());
 }
 
 export function startHookSpan(
@@ -133,15 +133,15 @@ export function startHookSpan(
   _numHooks: number,
   _hookDefinitions: string,
 ): Span {
-  return createNoopSpan()
+  return createNoopSpan();
 }
 
 export function endHookSpan(
   _span: Span,
   _metadata?: {
-    numSuccess?: number
-    numBlocking?: number
-    numNonBlockingError?: number
-    numCancelled?: number
+    numSuccess?: number;
+    numBlocking?: number;
+    numNonBlockingError?: number;
+    numCancelled?: number;
   },
 ): void {}

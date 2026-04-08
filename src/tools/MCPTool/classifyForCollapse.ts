@@ -587,18 +587,18 @@ const READ_TOOLS = new Set([
 
 function normalize(name: string): string {
   return name
-    .replace(/([a-z])([A-Z])/g, '$1_$2')
-    .replace(/-/g, '_')
-    .toLowerCase()
+    .replace(/([a-z])([A-Z])/g, "$1_$2")
+    .replace(/-/g, "_")
+    .toLowerCase();
 }
 
 export function classifyMcpToolForCollapse(
   _serverName: string,
   toolName: string,
 ): { isSearch: boolean; isRead: boolean } {
-  const normalized = normalize(toolName)
+  const normalized = normalize(toolName);
   return {
     isSearch: SEARCH_TOOLS.has(normalized),
     isRead: READ_TOOLS.has(normalized),
-  }
+  };
 }

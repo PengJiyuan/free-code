@@ -1,9 +1,9 @@
-import { setMaxListeners } from 'events'
+import { setMaxListeners } from "events";
 
 /**
  * Default max listeners for standard operations
  */
-const DEFAULT_MAX_LISTENERS = 50
+const DEFAULT_MAX_LISTENERS = 50;
 
 /**
  * Creates an AbortController with proper event listener limits set.
@@ -16,9 +16,9 @@ const DEFAULT_MAX_LISTENERS = 50
 export function createAbortController(
   maxListeners: number = DEFAULT_MAX_LISTENERS,
 ): AbortController {
-  const controller = new AbortController()
-  setMaxListeners(maxListeners, controller.signal)
-  return controller
+  const controller = new AbortController();
+  setMaxListeners(maxListeners, controller.signal);
+  return controller;
 }
 
 /**
@@ -31,8 +31,8 @@ function propagateAbort(
   this: WeakRef<AbortController>,
   weakChild: WeakRef<AbortController>,
 ): void {
-  const parent = this.deref()
-  weakChild.deref()?.abort(parent?.signal.reason)
+  const parent = this.deref();
+  weakChild.deref()?.abort(parent?.signal.reason);
 }
 
 /**
@@ -45,10 +45,10 @@ function removeAbortHandler(
   this: WeakRef<AbortController>,
   weakHandler: WeakRef<(...args: unknown[]) => void>,
 ): void {
-  const parent = this.deref()
-  const handler = weakHandler.deref()
+  const parent = this.deref();
+  const handler = weakHandler.deref();
   if (parent && handler) {
-    parent.signal.removeEventListener('abort', handler)
+    parent.signal.removeEventListener("abort", handler);
   }
 }
 
@@ -69,31 +69,31 @@ export function createChildAbortController(
   parent: AbortController,
   maxListeners?: number,
 ): AbortController {
-  const child = createAbortController(maxListeners)
+  const child = createAbortController(maxListeners);
 
   // Fast path: parent already aborted, no listener setup needed
   if (parent.signal.aborted) {
-    child.abort(parent.signal.reason)
-    return child
+    child.abort(parent.signal.reason);
+    return child;
   }
 
   // WeakRef prevents the parent from keeping an abandoned child alive.
   // If all strong references to child are dropped without aborting it,
   // the child can still be GC'd — the parent only holds a dead WeakRef.
-  const weakChild = new WeakRef(child)
-  const weakParent = new WeakRef(parent)
-  const handler = propagateAbort.bind(weakParent, weakChild)
+  const weakChild = new WeakRef(child);
+  const weakParent = new WeakRef(parent);
+  const handler = propagateAbort.bind(weakParent, weakChild);
 
-  parent.signal.addEventListener('abort', handler, { once: true })
+  parent.signal.addEventListener("abort", handler, { once: true });
 
   // Auto-cleanup: remove parent listener when child is aborted (from any source).
   // Both parent and handler are weakly held — if either has been GC'd or the
   // parent already aborted ({once: true}), the cleanup is a harmless no-op.
   child.signal.addEventListener(
-    'abort',
+    "abort",
     removeAbortHandler.bind(weakParent, new WeakRef(handler)),
     { once: true },
-  )
+  );
 
-  return child
+  return child;
 }

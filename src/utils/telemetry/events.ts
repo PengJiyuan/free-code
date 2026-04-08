@@ -1,9 +1,9 @@
 function isUserPromptLoggingEnabled(): boolean {
-  return false
+  return false;
 }
 
 export function redactIfDisabled(content: string): string {
-  return isUserPromptLoggingEnabled() ? content : '<REDACTED>'
+  return isUserPromptLoggingEnabled() ? content : "<REDACTED>";
 }
 
 export async function logOTelEvent(

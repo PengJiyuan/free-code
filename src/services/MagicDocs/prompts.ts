@@ -1,6 +1,6 @@
-import { join } from 'path'
-import { getClaudeConfigHomeDir } from '../../utils/envUtils.js'
-import { getFsImplementation } from '../../utils/fsOperations.js'
+import { join } from "path";
+import { getClaudeConfigHomeDir } from "../../utils/envUtils.js";
+import { getFsImplementation } from "../../utils/fsOperations.js";
 
 /**
  * Get the Magic Docs update prompt template
@@ -55,7 +55,7 @@ What NOT to document:
 
 Use the Edit tool with file_path: {{docPath}}
 
-REMEMBER: Only update if there is substantial new information. The Magic Doc header (# MAGIC DOC: {{docTitle}}) must remain unchanged.`
+REMEMBER: Only update if there is substantial new information. The Magic Doc header (# MAGIC DOC: {{docTitle}}) must remain unchanged.`;
 }
 
 /**
@@ -64,14 +64,14 @@ REMEMBER: Only update if there is substantial new information. The Magic Doc hea
  * Use {{variableName}} syntax for variable substitution (e.g., {{docContents}}, {{docPath}}, {{docTitle}})
  */
 async function loadMagicDocsPrompt(): Promise<string> {
-  const fs = getFsImplementation()
-  const promptPath = join(getClaudeConfigHomeDir(), 'magic-docs', 'prompt.md')
+  const fs = getFsImplementation();
+  const promptPath = join(getClaudeConfigHomeDir(), "magic-docs", "prompt.md");
 
   try {
-    return await fs.readFile(promptPath, { encoding: 'utf-8' })
+    return await fs.readFile(promptPath, { encoding: "utf-8" });
   } catch {
     // Silently fall back to default if custom prompt doesn't exist or fails to load
-    return getUpdatePromptTemplate()
+    return getUpdatePromptTemplate();
   }
 }
 
@@ -89,7 +89,7 @@ function substituteVariables(
     Object.prototype.hasOwnProperty.call(variables, key)
       ? variables[key]!
       : match,
-  )
+  );
 }
 
 /**
@@ -101,7 +101,7 @@ export async function buildMagicDocsUpdatePrompt(
   docTitle: string,
   instructions?: string,
 ): Promise<string> {
-  const promptTemplate = await loadMagicDocsPrompt()
+  const promptTemplate = await loadMagicDocsPrompt();
 
   // Build custom instructions section if provided
   const customInstructions = instructions
@@ -113,7 +113,7 @@ The document author has provided specific instructions for how this file should 
 "${instructions}"
 
 These instructions take priority over the general rules below. Make sure your updates align with these specific guidelines.`
-    : ''
+    : "";
 
   // Substitute variables in the prompt
   const variables = {
@@ -121,7 +121,7 @@ These instructions take priority over the general rules below. Make sure your up
     docPath,
     docTitle,
     customInstructions,
-  }
+  };
 
-  return substituteVariables(promptTemplate, variables)
+  return substituteVariables(promptTemplate, variables);
 }

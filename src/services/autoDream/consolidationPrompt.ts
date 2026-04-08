@@ -5,7 +5,7 @@ import {
   DIR_EXISTS_GUIDANCE,
   ENTRYPOINT_NAME,
   MAX_ENTRYPOINT_LINES,
-} from '../../memdir/memdir.js'
+} from "../../memdir/memdir.js";
 
 export function buildConsolidationPrompt(
   memoryRoot: string,
@@ -61,5 +61,5 @@ Update \`${ENTRYPOINT_NAME}\` so it stays under ${MAX_ENTRYPOINT_LINES} lines AN
 
 ---
 
-Return a brief summary of what you consolidated, updated, or pruned. If nothing changed (memories are already tight), say so.${extra ? `\n\n## Additional context\n\n${extra}` : ''}`
+Return a brief summary of what you consolidated, updated, or pruned. If nothing changed (memories are already tight), say so.${extra ? `\n\n## Additional context\n\n${extra}` : ""}`;
 }

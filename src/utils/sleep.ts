@@ -22,39 +22,39 @@ export function sleep(
     // `timer` while still in the Temporal Dead Zone.
     if (signal?.aborted) {
       if (opts?.throwOnAbort || opts?.abortError) {
-        void reject(opts.abortError?.() ?? new Error('aborted'))
+        void reject(opts.abortError?.() ?? new Error("aborted"));
       } else {
-        void resolve()
+        void resolve();
       }
-      return
+      return;
     }
     const timer = setTimeout(
       (signal, onAbort, resolve) => {
-        signal?.removeEventListener('abort', onAbort)
-        void resolve()
+        signal?.removeEventListener("abort", onAbort);
+        void resolve();
       },
       ms,
       signal,
       onAbort,
       resolve,
-    )
+    );
     function onAbort(): void {
-      clearTimeout(timer)
+      clearTimeout(timer);
       if (opts?.throwOnAbort || opts?.abortError) {
-        void reject(opts.abortError?.() ?? new Error('aborted'))
+        void reject(opts.abortError?.() ?? new Error("aborted"));
       } else {
-        void resolve()
+        void resolve();
       }
     }
-    signal?.addEventListener('abort', onAbort, { once: true })
+    signal?.addEventListener("abort", onAbort, { once: true });
     if (opts?.unref) {
-      timer.unref()
+      timer.unref();
     }
-  })
+  });
 }
 
 function rejectWithTimeout(reject: (e: Error) => void, message: string): void {
-  reject(new Error(message))
+  reject(new Error(message));
 }
 
 /**
@@ -72,13 +72,13 @@ export function withTimeout<T>(
   ms: number,
   message: string,
 ): Promise<T> {
-  let timer: ReturnType<typeof setTimeout> | undefined
+  let timer: ReturnType<typeof setTimeout> | undefined;
   const timeoutPromise = new Promise<never>((_, reject) => {
     // eslint-disable-next-line no-restricted-syntax -- not a sleep: REJECTS after ms (timeout guard)
-    timer = setTimeout(rejectWithTimeout, ms, reject, message)
-    if (typeof timer === 'object') timer.unref?.()
-  })
+    timer = setTimeout(rejectWithTimeout, ms, reject, message);
+    if (typeof timer === "object") timer.unref?.();
+  });
   return Promise.race([promise, timeoutPromise]).finally(() => {
-    if (timer !== undefined) clearTimeout(timer)
-  })
+    if (timer !== undefined) clearTimeout(timer);
+  });
 }

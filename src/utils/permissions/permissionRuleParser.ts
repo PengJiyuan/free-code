@@ -1,18 +1,18 @@
-import { feature } from 'bun:bundle'
-import { AGENT_TOOL_NAME } from '../../tools/AgentTool/constants.js'
-import { TASK_OUTPUT_TOOL_NAME } from '../../tools/TaskOutputTool/constants.js'
-import { TASK_STOP_TOOL_NAME } from '../../tools/TaskStopTool/prompt.js'
-import type { PermissionRuleValue } from './PermissionRule.js'
+import { feature } from "bun:bundle";
+import { AGENT_TOOL_NAME } from "../../tools/AgentTool/constants.js";
+import { TASK_OUTPUT_TOOL_NAME } from "../../tools/TaskOutputTool/constants.js";
+import { TASK_STOP_TOOL_NAME } from "../../tools/TaskStopTool/prompt.js";
+import type { PermissionRuleValue } from "./PermissionRule.js";
 
 // Dead code elimination: ant-only tool names are conditionally required so
 // their strings don't leak into external builds. Static imports always bundle.
 /* eslint-disable @typescript-eslint/no-require-imports */
 const BRIEF_TOOL_NAME: string | null =
-  feature('KAIROS') || feature('KAIROS_BRIEF')
+  feature("KAIROS") || feature("KAIROS_BRIEF")
     ? (
-        require('../../tools/BriefTool/prompt.js') as typeof import('../../tools/BriefTool/prompt.js')
+        require("../../tools/BriefTool/prompt.js") as typeof import("../../tools/BriefTool/prompt.js")
       ).BRIEF_TOOL_NAME
-    : null
+    : null;
 /* eslint-enable @typescript-eslint/no-require-imports */
 
 // Maps legacy tool names to their current canonical names.
@@ -23,21 +23,21 @@ const LEGACY_TOOL_NAME_ALIASES: Record<string, string> = {
   KillShell: TASK_STOP_TOOL_NAME,
   AgentOutputTool: TASK_OUTPUT_TOOL_NAME,
   BashOutputTool: TASK_OUTPUT_TOOL_NAME,
-  ...((feature('KAIROS') || feature('KAIROS_BRIEF')) && BRIEF_TOOL_NAME
+  ...((feature("KAIROS") || feature("KAIROS_BRIEF")) && BRIEF_TOOL_NAME
     ? { Brief: BRIEF_TOOL_NAME }
     : {}),
-}
+};
 
 export function normalizeLegacyToolName(name: string): string {
-  return LEGACY_TOOL_NAME_ALIASES[name] ?? name
+  return LEGACY_TOOL_NAME_ALIASES[name] ?? name;
 }
 
 export function getLegacyToolNames(canonicalName: string): string[] {
-  const result: string[] = []
+  const result: string[] = [];
   for (const [legacy, canonical] of Object.entries(LEGACY_TOOL_NAME_ALIASES)) {
-    if (canonical === canonicalName) result.push(legacy)
+    if (canonical === canonicalName) result.push(legacy);
   }
-  return result
+  return result;
 }
 
 /**
@@ -54,9 +54,9 @@ export function getLegacyToolNames(canonicalName: string): string[] {
  */
 export function escapeRuleContent(content: string): string {
   return content
-    .replace(/\\/g, '\\\\') // Escape backslashes first
-    .replace(/\(/g, '\\(') // Escape opening parentheses
-    .replace(/\)/g, '\\)') // Escape closing parentheses
+    .replace(/\\/g, "\\\\") // Escape backslashes first
+    .replace(/\(/g, "\\(") // Escape opening parentheses
+    .replace(/\)/g, "\\)"); // Escape closing parentheses
 }
 
 /**
@@ -73,9 +73,9 @@ export function escapeRuleContent(content: string): string {
  */
 export function unescapeRuleContent(content: string): string {
   return content
-    .replace(/\\\(/g, '(') // Unescape opening parentheses
-    .replace(/\\\)/g, ')') // Unescape closing parentheses
-    .replace(/\\\\/g, '\\') // Unescape backslashes last
+    .replace(/\\\(/g, "(") // Unescape opening parentheses
+    .replace(/\\\)/g, ")") // Unescape closing parentheses
+    .replace(/\\\\/g, "\\"); // Unescape backslashes last
 }
 
 /**
@@ -94,42 +94,42 @@ export function permissionRuleValueFromString(
   ruleString: string,
 ): PermissionRuleValue {
   // Find the first unescaped opening parenthesis
-  const openParenIndex = findFirstUnescapedChar(ruleString, '(')
+  const openParenIndex = findFirstUnescapedChar(ruleString, "(");
   if (openParenIndex === -1) {
     // No parenthesis found - this is just a tool name
-    return { toolName: normalizeLegacyToolName(ruleString) }
+    return { toolName: normalizeLegacyToolName(ruleString) };
   }
 
   // Find the last unescaped closing parenthesis
-  const closeParenIndex = findLastUnescapedChar(ruleString, ')')
+  const closeParenIndex = findLastUnescapedChar(ruleString, ")");
   if (closeParenIndex === -1 || closeParenIndex <= openParenIndex) {
     // No matching closing paren or malformed - treat as tool name
-    return { toolName: normalizeLegacyToolName(ruleString) }
+    return { toolName: normalizeLegacyToolName(ruleString) };
   }
 
   // Ensure the closing paren is at the end
   if (closeParenIndex !== ruleString.length - 1) {
     // Content after closing paren - treat as tool name
-    return { toolName: normalizeLegacyToolName(ruleString) }
+    return { toolName: normalizeLegacyToolName(ruleString) };
   }
 
-  const toolName = ruleString.substring(0, openParenIndex)
-  const rawContent = ruleString.substring(openParenIndex + 1, closeParenIndex)
+  const toolName = ruleString.substring(0, openParenIndex);
+  const rawContent = ruleString.substring(openParenIndex + 1, closeParenIndex);
 
   // Missing toolName (e.g., "(foo)") is malformed - treat whole string as tool name
   if (!toolName) {
-    return { toolName: normalizeLegacyToolName(ruleString) }
+    return { toolName: normalizeLegacyToolName(ruleString) };
   }
 
   // Empty content (e.g., "Bash()") or standalone wildcard (e.g., "Bash(*)")
   // should be treated as just the tool name (tool-wide rule)
-  if (rawContent === '' || rawContent === '*') {
-    return { toolName: normalizeLegacyToolName(toolName) }
+  if (rawContent === "" || rawContent === "*") {
+    return { toolName: normalizeLegacyToolName(toolName) };
   }
 
   // Unescape the content
-  const ruleContent = unescapeRuleContent(rawContent)
-  return { toolName: normalizeLegacyToolName(toolName), ruleContent }
+  const ruleContent = unescapeRuleContent(rawContent);
+  return { toolName: normalizeLegacyToolName(toolName), ruleContent };
 }
 
 /**
@@ -145,10 +145,10 @@ export function permissionRuleValueToString(
   ruleValue: PermissionRuleValue,
 ): string {
   if (!ruleValue.ruleContent) {
-    return ruleValue.toolName
+    return ruleValue.toolName;
   }
-  const escapedContent = escapeRuleContent(ruleValue.ruleContent)
-  return `${ruleValue.toolName}(${escapedContent})`
+  const escapedContent = escapeRuleContent(ruleValue.ruleContent);
+  return `${ruleValue.toolName}(${escapedContent})`;
 }
 
 /**
@@ -159,19 +159,19 @@ function findFirstUnescapedChar(str: string, char: string): number {
   for (let i = 0; i < str.length; i++) {
     if (str[i] === char) {
       // Count preceding backslashes
-      let backslashCount = 0
-      let j = i - 1
-      while (j >= 0 && str[j] === '\\') {
-        backslashCount++
-        j--
+      let backslashCount = 0;
+      let j = i - 1;
+      while (j >= 0 && str[j] === "\\") {
+        backslashCount++;
+        j--;
       }
       // If even number of backslashes, the char is unescaped
       if (backslashCount % 2 === 0) {
-        return i
+        return i;
       }
     }
   }
-  return -1
+  return -1;
 }
 
 /**
@@ -182,17 +182,17 @@ function findLastUnescapedChar(str: string, char: string): number {
   for (let i = str.length - 1; i >= 0; i--) {
     if (str[i] === char) {
       // Count preceding backslashes
-      let backslashCount = 0
-      let j = i - 1
-      while (j >= 0 && str[j] === '\\') {
-        backslashCount++
-        j--
+      let backslashCount = 0;
+      let j = i - 1;
+      while (j >= 0 && str[j] === "\\") {
+        backslashCount++;
+        j--;
       }
       // If even number of backslashes, the char is unescaped
       if (backslashCount % 2 === 0) {
-        return i
+        return i;
       }
     }
   }
-  return -1
+  return -1;
 }

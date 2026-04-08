@@ -1,31 +1,31 @@
-export type ModifierKey = 'shift' | 'command' | 'control' | 'option'
+export type ModifierKey = "shift" | "command" | "control" | "option";
 
-let prewarmed = false
+let prewarmed = false;
 type NativeModifiersModule = {
-  prewarm?: () => void
-  isModifierPressed?: (modifier: string) => boolean
-}
+  prewarm?: () => void;
+  isModifierPressed?: (modifier: string) => boolean;
+};
 
-let nativeModifiersModule: NativeModifiersModule | null | undefined
+let nativeModifiersModule: NativeModifiersModule | null | undefined;
 
 function loadNativeModifiersModule(): NativeModifiersModule | null {
-  if (process.platform !== 'darwin') {
-    return null
+  if (process.platform !== "darwin") {
+    return null;
   }
 
   if (nativeModifiersModule !== undefined) {
-    return nativeModifiersModule
+    return nativeModifiersModule;
   }
 
   try {
     nativeModifiersModule =
       // eslint-disable-next-line @typescript-eslint/no-require-imports
-      (require('modifiers-napi') as NativeModifiersModule) ?? null
+      (require("modifiers-napi") as NativeModifiersModule) ?? null;
   } catch {
-    nativeModifiersModule = null
+    nativeModifiersModule = null;
   }
 
-  return nativeModifiersModule
+  return nativeModifiersModule;
 }
 
 /**
@@ -33,11 +33,11 @@ function loadNativeModifiersModule(): NativeModifiersModule | null {
  * Call this early to avoid delay on first use.
  */
 export function prewarmModifiers(): void {
-  if (prewarmed || process.platform !== 'darwin') {
-    return
+  if (prewarmed || process.platform !== "darwin") {
+    return;
   }
-  prewarmed = true
-  loadNativeModifiersModule()?.prewarm?.()
+  prewarmed = true;
+  loadNativeModifiersModule()?.prewarm?.();
 }
 
 /**
@@ -45,8 +45,8 @@ export function prewarmModifiers(): void {
  */
 export function isModifierPressed(modifier: ModifierKey): boolean {
   try {
-    return loadNativeModifiersModule()?.isModifierPressed?.(modifier) ?? false
+    return loadNativeModifiersModule()?.isModifierPressed?.(modifier) ?? false;
   } catch {
-    return false
+    return false;
   }
 }

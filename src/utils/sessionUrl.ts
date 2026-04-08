@@ -1,13 +1,13 @@
-import { randomUUID, type UUID } from 'crypto'
-import { validateUuid } from './uuid.js'
+import { randomUUID, type UUID } from "crypto";
+import { validateUuid } from "./uuid.js";
 
 export type ParsedSessionUrl = {
-  sessionId: UUID
-  ingressUrl: string | null
-  isUrl: boolean
-  jsonlFile: string | null
-  isJsonlFile: boolean
-}
+  sessionId: UUID;
+  ingressUrl: string | null;
+  isUrl: boolean;
+  jsonlFile: string | null;
+  isJsonlFile: boolean;
+};
 
 /**
  * Parses a session resume identifier which can be either:
@@ -22,14 +22,14 @@ export function parseSessionIdentifier(
 ): ParsedSessionUrl | null {
   // Check for JSONL file path before URL parsing, since Windows absolute
   // paths (e.g., C:\path\file.jsonl) are parsed as valid URLs with C: as protocol
-  if (resumeIdentifier.toLowerCase().endsWith('.jsonl')) {
+  if (resumeIdentifier.toLowerCase().endsWith(".jsonl")) {
     return {
       sessionId: randomUUID() as UUID,
       ingressUrl: null,
       isUrl: false,
       jsonlFile: resumeIdentifier,
       isJsonlFile: true,
-    }
+    };
   }
 
   // Check if it's a plain UUID
@@ -40,12 +40,12 @@ export function parseSessionIdentifier(
       isUrl: false,
       jsonlFile: null,
       isJsonlFile: false,
-    }
+    };
   }
 
   // Check if it's a URL
   try {
-    const url = new URL(resumeIdentifier)
+    const url = new URL(resumeIdentifier);
 
     // Use the entire URL as the ingress URL
     // Always generate a random session ID
@@ -55,10 +55,10 @@ export function parseSessionIdentifier(
       isUrl: true,
       jsonlFile: null,
       isJsonlFile: false,
-    }
+    };
   } catch {
     // Not a valid URL
   }
 
-  return null
+  return null;
 }

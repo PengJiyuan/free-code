@@ -5,20 +5,20 @@
 export function bootstrapTelemetry(): void {}
 
 export function parseExporterTypes(value: string | undefined): string[] {
-  return (value || '')
+  return (value || "")
     .trim()
-    .split(',')
+    .split(",")
     .filter(Boolean)
-    .map(token => token.trim())
-    .filter(token => token !== 'none')
+    .map((token) => token.trim())
+    .filter((token) => token !== "none");
 }
 
 export function isTelemetryEnabled(): boolean {
-  return false
+  return false;
 }
 
 export async function initializeTelemetry(): Promise<null> {
-  return null
+  return null;
 }
 
 export async function flushTelemetry(): Promise<void> {}

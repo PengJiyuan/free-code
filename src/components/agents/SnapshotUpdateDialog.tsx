@@ -1,17 +1,17 @@
-import { useEffect } from 'react'
+import { useEffect } from "react";
 
 type Props = {
-  agentType: string
-  scope: unknown
-  snapshotTimestamp: string
-  onComplete: (choice: 'merge' | 'keep' | 'replace') => void
-  onCancel: () => void
-}
+  agentType: string;
+  scope: unknown;
+  snapshotTimestamp: string;
+  onComplete: (choice: "merge" | "keep" | "replace") => void;
+  onCancel: () => void;
+};
 
 export function SnapshotUpdateDialog({ onCancel }: Props) {
   useEffect(() => {
-    onCancel()
-  }, [onCancel])
+    onCancel();
+  }, [onCancel]);
 
-  return null
+  return null;
 }

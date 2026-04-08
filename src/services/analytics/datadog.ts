@@ -2,7 +2,7 @@
  * Datadog logging is intentionally disabled in the OSS build.
  */
 
-export const initializeDatadog = async (): Promise<boolean> => false
+export const initializeDatadog = async (): Promise<boolean> => false;
 
 export async function shutdownDatadog(): Promise<void> {}
 

@@ -1,24 +1,21 @@
-import {
-  getCachedMCConfig,
-  type CachedMCConfig,
-} from './cachedMCConfig.js'
+import { getCachedMCConfig, type CachedMCConfig } from "./cachedMCConfig.js";
 
 export type CacheEditsBlock = {
-  type: 'cache_edits'
-  edits: { type: 'delete'; cache_reference: string }[]
-}
+  type: "cache_edits";
+  edits: { type: "delete"; cache_reference: string }[];
+};
 
 export type PinnedCacheEdits = {
-  userMessageIndex: number
-  block: CacheEditsBlock
-}
+  userMessageIndex: number;
+  block: CacheEditsBlock;
+};
 
 export type CachedMCState = {
-  pinnedEdits: PinnedCacheEdits[]
-  registeredTools: Set<string>
-  toolOrder: string[]
-  deletedRefs: Set<string>
-}
+  pinnedEdits: PinnedCacheEdits[];
+  registeredTools: Set<string>;
+  toolOrder: string[];
+  deletedRefs: Set<string>;
+};
 
 export function createCachedMCState(): CachedMCState {
   return {
@@ -26,32 +23,32 @@ export function createCachedMCState(): CachedMCState {
     registeredTools: new Set(),
     toolOrder: [],
     deletedRefs: new Set(),
-  }
+  };
 }
 
 export function isCachedMicrocompactEnabled(): boolean {
-  return getCachedMCConfig().enabled
+  return getCachedMCConfig().enabled;
 }
 
 export function isModelSupportedForCacheEditing(model: string): boolean {
-  return getCachedMCConfig().supportedModels.some(pattern =>
+  return getCachedMCConfig().supportedModels.some((pattern) =>
     model.includes(pattern),
-  )
+  );
 }
 
-export { getCachedMCConfig }
-export type { CachedMCConfig }
+export { getCachedMCConfig };
+export type { CachedMCConfig };
 
 export function registerToolResult(
   state: CachedMCState,
   toolUseId: string,
 ): void {
   if (state.registeredTools.has(toolUseId)) {
-    return
+    return;
   }
 
-  state.registeredTools.add(toolUseId)
-  state.toolOrder.push(toolUseId)
+  state.registeredTools.add(toolUseId);
+  state.toolOrder.push(toolUseId);
 }
 
 export function registerToolMessage(
@@ -60,14 +57,17 @@ export function registerToolMessage(
 ): void {}
 
 export function getToolResultsToDelete(state: CachedMCState): string[] {
-  const config = getCachedMCConfig()
-  const activeRefs = state.toolOrder.filter(id => !state.deletedRefs.has(id))
+  const config = getCachedMCConfig();
+  const activeRefs = state.toolOrder.filter((id) => !state.deletedRefs.has(id));
 
   if (!config.enabled || activeRefs.length < config.triggerThreshold) {
-    return []
+    return [];
   }
 
-  return activeRefs.slice(0, Math.max(0, activeRefs.length - config.keepRecent))
+  return activeRefs.slice(
+    0,
+    Math.max(0, activeRefs.length - config.keepRecent),
+  );
 }
 
 export function createCacheEditsBlock(
@@ -75,30 +75,30 @@ export function createCacheEditsBlock(
   toolUseIds: string[],
 ): CacheEditsBlock | null {
   const edits = toolUseIds
-    .filter(id => !state.deletedRefs.has(id))
-    .map(id => {
-      state.deletedRefs.add(id)
+    .filter((id) => !state.deletedRefs.has(id))
+    .map((id) => {
+      state.deletedRefs.add(id);
       return {
-        type: 'delete' as const,
+        type: "delete" as const,
         cache_reference: id,
-      }
-    })
+      };
+    });
 
   if (edits.length === 0) {
-    return null
+    return null;
   }
 
   return {
-    type: 'cache_edits',
+    type: "cache_edits",
     edits,
-  }
+  };
 }
 
 export function markToolsSentToAPI(_state: CachedMCState): void {}
 
 export function resetCachedMCState(state: CachedMCState): void {
-  state.pinnedEdits.length = 0
-  state.registeredTools.clear()
-  state.toolOrder.length = 0
-  state.deletedRefs.clear()
+  state.pinnedEdits.length = 0;
+  state.registeredTools.clear();
+  state.toolOrder.length = 0;
+  state.deletedRefs.clear();
 }
